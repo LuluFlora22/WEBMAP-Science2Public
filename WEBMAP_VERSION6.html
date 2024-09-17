@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projektkarte für Sachsen-Anhalt</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Leaflet-Awesome-Markers CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.awesome-markers/2.0.1/leaflet.awesome-markers.css">
+    <!-- Font Awesome Version 4.7 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-top: 20px;
+            position: relative;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f4;
+        }
+        header {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .content {
+            width: 80%;
+            max-width: 1200px;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .menu-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            width: 150px;
+        }
+        .menu-category {
+            margin-bottom: 10px;
+        }
+        .menu-category h2 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        .menu-category div {
+            display: none;
+            margin-bottom: 5px;
+        }
+        .menu-category button {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: left;
+        }
+        .info-button, .website-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 10px 0;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .search-bar {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .search-bar input {
+            width: calc(100% - 40px);
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-right: 10px;
+        }
+        .search-bar button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+        #modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        #modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .info-text {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+        .category-tag {
+            display: inline-block;
+            padding: 2px 5px;
+            border-radius: 5px;
+            color: white;
+            margin-right: 5px;
+            font-size: 12px;
+        }
+        .Klima { background-color: #007bff; }
+        .Soziales { background-color: #28a745; }
+        .Jugend { background-color: #dc3545; }
+        .Kultur { background-color: #ffc107; }
+        .Landschaft { background-color: #17a2b8; }
+        .Partizipation { background-color: #6f42c1; }
+        .Forschung { background-color: #fd7e14; }
+        .Veranstaltungen { background-color: #20c997; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Projektkarte für Sachsen-Anhalt</h1>
+    </header>
+
+    <div class="content">
+        <p>Willkommen auf unserer interaktiven Projektkarte für Sachsen-Anhalt. Hier können Sie verschiedene Projekte in der Region erkunden und weitere Informationen dazu erhalten.</p>
+    </div>
+
+    <!-- Suchleiste -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Projektname oder Details suchen..." />
+        <button onclick="searchProjects()">Suchen</button>
+    </div>
+
+    <div id="map">
+        <div class="menu-container">
+            <p class="info-text">Klicken Sie auf eine Kategorie, um die darin enthaltenen Projekte anzuzeigen.</p>
+            <div class="menu-category">
+                <h2 onclick="toggleCategory('menuKultur')">Kultur</h2>
+                <div id="menuKultur"></div>
+            </div>
+            <div class="menu-category">
+                <h2 onclick="toggleCategory('menuKlima')">Klima</h2>
+                <div id="menuKlima"></div>
+            </div>
+            <div class="menu-category">
+                <h2 onclick="toggleCategory('menuUmwelt')">Umwelt</h2>
+                <div id="menuUmwelt"></div>
+            </div>
+            <div class="menu-category">
+                <h2 onclick="toggleCategory('menuPartizipation')">Partizipation</h2>
+                <div id="menuPartizipation"></div>
+            </div>
+            <div class="menu-category">
+                <h2 onclick="toggleCategory('menuSoziales')">Soziales</h2>
+                <div id="menuSoziales"></div>
+            </div>
+            <div class="menu-category">
+                <h2 onclick="toggleCategory('menuJugend')">Jugend</h2>
+                <div id="menuJugend"></div>
+            </div>
+            <div class="menu-category">
+                <h2 onclick="toggleCategory('menuLandschaft')">Landschaft</h2>
+                <div id="menuLandschaft"></div>
+            </div>
+            <div class="menu-category">
+                <h2 onclick="toggleCategory('menuForschung')">Forschung</h2>
+                <div id="menuForschung"></div>
+            </div>
+            <div class="menu-category">
+                <h2 onclick="toggleCategory('menuVeranstaltungen')">Veranstaltungen</h2>
+                <div id="menuVeranstaltungen"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal">
+        <div id="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Leaflet-Awesome-Markers JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.awesome-markers/2.0.1/leaflet.awesome-markers.min.js"></script>
+
+    <script>
+        // Initialisiere die Karte und setze den Mittelpunkt
+        var map = L.map('map', {
+            zoomControl: false
+        }).setView([51.9, 11.7], 8); // Initialer Zoom für Sachsen-Anhalt
+
+        // OpenStreetMap Basiskarte hinzufügen
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Begrenze die Karte auf Sachsen-Anhalt
+        var southWest = L.latLng(50.5, 10.5);
+        var northEast = L.latLng(52.2, 12.5);
+        var bounds = L.latLngBounds(southWest, northEast);
+        map.setMaxBounds(bounds);
+        map.setMinZoom(7); // Minimaler Zoom um ganz Sachsen-Anhalt zu zeigen
+        map.setMaxZoom(16);
+
+        // Zoom-Steuerung oben rechts platzieren
+        L.control.zoom({
+            position: 'topright'
+        }).addTo(map);
+
+        // Beispielprojekte hinzufügen
+        var projects = [
+            { 
+                lat: 51.50404632197235, 
+                lng: 11.953340815795416, 
+                name: 'MS Halle', 
+                details: 'Die Make Science Halle, das Schiff für Bürgerforscher*innen, begibt sich in die aufregenden Tiefen der „Blauen Bioökonomie.”', 
+                website: 'https://ms-halle.science/', 
+                image: 'https://ms-halle.science/wp-content/uploads/2021/01/DNGP4586-1-1024x683.jpg', 
+                category: 'Partizipation',
+                tags: ['Partizipation'] // Tags hinzufügen
+            },
+            { 
+                lat: 52.1311, // Koordinaten für Magdeburg
+                lng: 11.6363, 
+                name: 'Beispielprojekt in Magdeburg', 
+                details: 'Dies ist ein Beispielprojekt.', 
+                website: '#', // Kein Link für Beispiel
+                image: 'https://ms-halle.science/wp-content/uploads/2021/01/DNGP4586-1-1024x683.jpg', 
+                category: 'Kultur',
+                tags: ['Kultur'], // Tags hinzufügen
+                iconUrl: 'https://github.com/LuluFlora22/WEBMAP-Science2Public/raw/main/music-solid.svg' // Icon URL hinzufügen
+            }
+        ];
+
+        // Marker und Popups für Projekte erstellen
+        projects.forEach(function(project) {
+            var icon;
+            if (project.category === 'Umwelt') {
+                // Verwende Awesome Markers für Umweltprojekt
+                icon = L.AwesomeMarkers.icon({
+                    icon: 'leaf',
+                    markerColor: 'green',
+                    prefix: 'fa'  // Font Awesome prefix
+                });
+            } else if (project.iconUrl) {
+                // Benutze das spezifische Icon für das Beispielprojekt in Magdeburg
+                icon = L.icon({
+                    iconUrl: project.iconUrl,
+                    iconSize: [25, 41], // Größe des Icons anpassen
+                    iconAnchor: [12, 41],
+                    shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png'
+                });
+            } else {
+                // Standard Icon für MS Halle
+                icon = L.icon({
+                    iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+                    shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png'
+                });
+            }
+
+            // Marker zur Karte hinzufügen
+            var marker = L.marker([project.lat, project.lng], { icon: icon }).addTo(map);
+            marker.bindPopup('<b>' + project.name + '</b><br>' + 
+                             '<p>' + project.details + '</p>' +  
+                             project.tags.map(tag => `<span class="category-tag ${tag}">#${tag}</span>`).join('') + // Tags im Pop-Up anzeigen
+                             '<button class="info-button" onclick="showDetails(\'' + project.name + '\')">Weitere Infos</button>');
+
+            // Projekt zur richtigen Kategorie im Menü hinzufügen
+            var menu;
+            if (project.category === 'Kultur') {
+                menu = document.getElementById('menuKultur');
+            } else if (project.category === 'Klima') {
+                menu = document.getElementById('menuKlima');
+            } else if (project.category === 'Umwelt') {
+                menu = document.getElementById('menuUmwelt');
+            } else if (project.category === 'Partizipation') {
+                menu = document.getElementById('menuPartizipation');
+            } else if (project.category === 'Soziales') {
+                menu = document.getElementById('menuSoziales');
+            } else if (project.category === 'Jugend') {
+                menu = document.getElementById('menuJugend');
+            } else if (project.category === 'Landschaft') {
+                menu = document.getElementById('menuLandschaft');
+            } else if (project.category === 'Forschung') {
+                menu = document.getElementById('menuForschung');
+            } else if (project.category === 'Veranstaltungen') {
+                menu = document.getElementById('menuVeranstaltungen');
+            }
+            if (menu) {
+                menu.innerHTML += '<button onclick="map.setView([' + project.lat + ', ' + project.lng + '], 12)">' + project.name + '</button>';
+            }
+        });
+
+        // Details anzeigen
+        function showDetails(name) {
+            var project = projects.find(function(p) {
+                return p.name === name;
+            });
+
+            if (project) {
+                var modal = document.getElementById("modal");
+                var modalBody = document.getElementById("modal-body");
+                modalBody.innerHTML = '<h2>' + project.name + '</h2>' +
+                                      '<p>' + project.details + '</p>' +
+                                      project.tags.map(tag => `<span class="category-tag ${tag}">#${tag}</span>`).join('') + // Tags im Modal anzeigen
+                                      '<p>Welche Botschaften möchten Sie in der Gesellschaft verbreiten?</p>' +
+                                      '<p><em>„....................”</em></p>' +
+                                      '<p>Was haben Sie bereits erreicht?</p>' +
+                                      '<p><em>„....................”</em></p>' +
+                                      '<p>Worauf möchten Sie in Zukunft stolz sein?</p>' +
+                                      '<p><em>„.....................”</em></p>' +
+                                      '<a href="' + project.website + '" target="_blank" class="website-button">Website</a>' +
+                                      '<img src="' + project.image + '" alt="Projektbild" style="max-width: 100%; height: auto; margin-top: 10px;">';
+                modal.style.display = "block";
+            }
+        }
+
+        function closeModal() {
+            document.getElementById("modal").style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            var modal = document.getElementById("modal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        function searchProjects() {
+            var input = document.getElementById('searchInput').value.toLowerCase();
+            projects.forEach(function(project) {
+                if (project.name.toLowerCase().includes(input) || project.details.toLowerCase().includes(input)) {
+                    map.setView([project.lat, project.lng], 12);
+                }
+            });
+        }
+
+        function toggleCategory(id) {
+            var element = document.getElementById(id);
+            if (element.style.display === "none" || element.style.display === "") {
+                element.style.display = "block";
+            } else {
+                element.style.display = "none";
+            }
+        }
+
+        // GeoJSON-Datei für die Landesgrenze laden
+        fetch("https://raw.githubusercontent.com/LuluFlora22/WEBMAP-Science2Public/main/sachsen_anhalt%20(1).geojson")
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: function(feature) {
+                        return {
+                            color: '#3188ff', // Farbe der Grenzlinie
+                            weight: 2, // Linienstärke
+                            opacity: 1 // Opazität
+                        };
+                    }
+                }).addTo(map);
+            })
+            .catch(error => console.error('Error loading the GeoJSON:', error));
+    </script>
+</body>
+</html>
