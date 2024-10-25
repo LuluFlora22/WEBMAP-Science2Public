@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projektkarte für Sachsen-Anhalt</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Font Awesome Version 4.7 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link href="https://fonts.googleapis.com/css2?family=Viga&display=swap" rel="stylesheet">
+
+
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+            border: 3px solid #FF8E74;
+            border-radius: 8px;
+            margin-top: 40px;
+            position: relative;
+        }
+        body {
+            font-family: Viga, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f4;
+        }
+        header {
+            width: 100%;
+            background: linear-gradient(to right, rgb(0, 164, 255), rgb(220, 129, 255), rgb(255, 142, 116));
+            color: white ;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .container {
+    flex: 2;
+    background: linear-gradient(to right, rgb(0, 164, 255), rgb(220, 129, 255), rgb(255, 142, 116));
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	display: flex; /* Flexbox verwenden, um die Hauptcontainer nebeneinander anzuordnen */
+    flex-direction: row; /* nebeneinander liegen */
+    gap: 20px
+        }
+		.intro-container {
+    background: linear-gradient(to right, rgb(0, 164, 255), rgb(220, 129, 255), rgb(255, 142, 116));
+    color: black;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+	
+	}
+	/* Wrapper für Einleitung und Menü */
+     .intro-and-menu-wrapper {
+    display: flex;
+    flex-direction: row; /* Einleitung und Menü nebeneinander */
+    gap: 20px;
+    width: 100%; 
+}
+        .intro-and-search {
+            flex: 2;
+			display: flex
+			flex-direction: column;
+			max-width: 600px
+            margin-right: 20px;
+            margin-bottom: 20px;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+
+        }
+        .content {
+            width: 100%;
+            background: black;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+
+        .search-bar {
+            width: 95%;
+            max-width: 580px; /* Begrenzung der maximalen Breite */
+            margin: 20px 0 20px 0;
+            display: flex;
+			flex-direction: column; /* Ordnet das Eingabefeld und den Button untereinander an */
+            align-items: flex-start; /* Button linksbündig */
+            gap: 10px;
+            justify-content: flex-start;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #FF8E74;
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .search-bar button {
+            background-color: #FF8E74;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-left: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			align-self: stretch
+        }
+		/* Logo-Container für ordentliche Platzierung unter der Suchleiste */
+.logo-container {
+    display: flex;
+    justify-content: center;     /* Zentriert das Logo horizontal */
+    margin-top: 10px;            /* Abstand zur Suchleiste */
+}
+
+/* Das Logo selbst */
+.logo {
+    max-width: 200px;             /* Begrenzung der maximalen Breite des Logos */
+    height: auto;                
+    opacity: 0.9;                /* Logo wird etwas dezenter dargestellt */
+	transition: transform 0.3s, opacity 0.3s; /* leichte Animationseffekte */
+}
+
+.logo:hover {
+    transform: scale(1.05);      /* Leichte Vergrößerung bei Hover */
+    opacity: 1;                  /* Vollsichtbar bei Hover */
+
+}
+
+        .menu-container {
+            flex: 1;
+			 flex-direction: column;
+    gap: 20px;
+    max-width: 300px
+	  overflow-y: auto; /* Ermöglicht Scrollen, falls der Inhalt zu groß wird */
+            background: linear-gradient(to bottom, rgb(0, 164, 255), rgb(220, 129, 255), rgb(255, 142, 116));
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            color: white;
+            margin-bottom: 20px;
+        }
+.category-tag.Stadt {
+    background-color: rgb(0, 164, 255);
+}
+.category-tag.Land {
+    background-color: rgb(0, 200, 150);
+}
+.category-tag.Wissenschaft {
+    background-color: rgb(220, 129, 255);
+}
+.category-tag.Technologie {
+    background-color: rgb(255, 200, 0);
+}
+.category-tag.Partizipation {
+    background-color: rgb(255, 142, 116);
+}
+.category-tag.Umwelt {
+    background-color: rgb(100, 200, 100);
+}
+.category-tag.Soziales {
+    background-color: rgb(200, 100, 255);
+}
+.category-tag.Kultur {
+    background-color: #FF8E74;
+}
+.category-tag.Gruendung {
+    background-color: rgb(150, 150, 255);
+}
+.category-tag.Wirtschaft {
+    background-color: rgb(255, 170, 0);
+}
+.category-tag.Transformation {
+    background-color: rgb(180, 100, 200);
+}
+.category-tag.Jugend {
+    background-color: rgb(0, 180, 255);
+}
+.category-tag.Demokratie {
+    background-color: rgb(255, 100, 150);
+}
+
+        .menu-category {
+            margin-bottom: 10px;
+        }
+        .menu-category h2 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        .menu-category div {
+            display: none;
+            margin-bottom: 5px;
+        }
+        .menu-category button {
+            width: 100%;
+            background-color: #FF8E74;
+            color: white;
+            border: none;
+            padding: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: left;
+        }
+        .category-tag {
+            display: inline-block;
+            padding: 2px 5px;
+            border-radius: 5px;
+            color: white;
+            margin-right: 5px;
+            font-size: 12px;
+        }
+ .website-button {
+            background-color: #FF8E74;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 10px 0;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+ button.info-button {
+            background-color: black;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 10px 0;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+button.info-button: hover {
+    background-color: #E6735F; /* Etwas dunklere Farbe für den Hover-Zustand */
+}
+#modal {
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    display: none;
+    background: #ffffff; 
+    padding: 20px; 
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 5000;
+    max-width: 600px;
+	max-height: 80vh; /* Begrenze die Höhe auf 80% der Bildschirmhöhe */
+    overflow-y: auto; 
+    text-align: left; /* Text bleibt gut lesbar */
+  
+}
+
+#modal-body {
+    color: black; 
+    font-size: 16px; 
+	background: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.close {
+    cursor: pointer;
+    float: right;
+    font-size: 20px;
+    color: #FF8E74; 
+	position: absolute
+}
+.popup-footer {
+    display: flex;
+    align-items: center; /* Vertikale Ausrichtung */
+    gap: 10px; /* Abstand zwischen den Hashtags und dem Button */
+    margin-top: 10px; /* Abstand vom Inhalt des Pop-ups */
+}
+
+
+
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Strukturwandelkompass für Sachsen-Anhalt</h1>
+    </header>
+
+    <div class="container">
+    <div class="intro-and-search">
+        <div class="content">
+            <p>Willkommen auf unserer interaktiven Projektkarte. Öffne mit einem Klick die Black Boxes und lass Dich von vielfältigen Wissenschaftsprojekten überraschen! </p>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Suche nach Projekten" />
+            <button onclick="searchProjects()">Suchen</button>
+        </div>
+        <!-- Logo unterhalb der Suchleiste -->
+        <div class="logo-container">
+            <img src="https://raw.githubusercontent.com/LuluFlora22/WEBMAP-Science2Public/refs/heads/main/LOGO_blackbox.png" alt="Projekt Logo" class="logo">
+        </div>
+    </div>
+    <div class="menu-container">
+    <div class="menu-block">
+        <p class="info-text">Klicke auf die Kategorien und entdecke die Projekte.</p>
+    </div>
+    <div class="menu-block">
+        <div class="menu-category">
+            <h2 onclick="toggleCategory('menuStadt')">Stadt</h2>
+            <div id="menuStadt"></div>
+        </div>
+        <div class="menu-category">
+            <h2 onclick="toggleCategory('menuLand')">Land</h2>
+            <div id="menuLand"></div>
+        </div>
+        <div class="menu-category">
+            <h2 onclick="toggleCategory('menuWissenschaft')">Wissenschaft & Forschung</h2>
+            <div id="menuWissenschaft"></div>
+        </div>
+        <div class="menu-category">
+            <h2 onclick="toggleCategory('menuTechnologie')">Technologie</h2>
+            <div id="menuTechnologie"></div>
+        </div>
+        <div class="menu-category">
+            <h2 onclick="toggleCategory('menuPartizipation')">Partizipation</h2>
+            <div id="menuPartizipation"></div>
+        </div>
+        <div class="menu-category">
+            <h2 onclick="toggleCategory('menuUmwelt')">Umwelt & Klima</h2>
+            <div id="menuUmwelt"></div>
+        </div>
+    </div>
+    <div class="menu-block">
+        <div class="menu-category">
+            <h2 onclick="toggleCategory('menuSoziales')">Soziales</h2>
+            <div id="menuSoziales"></div>
+        </div>
+        <div class="menu-category">
+            <h2 onclick="toggleCategory('menuKultur')">Kultur</h2>
+            <div id="menuKultur"></div>
+        </div>
+        <div class="menu-category">
+            <h2 onclick="toggleCategory('menuGruendung')">Gründung</h2>
+            <div id="menuGruendung"></div>
+        </div>
+        <div class="menu-category">
+            <h2 onclick="toggleCategory('menuWirtschaft')">Wirtschaft</h2>
+            <div id="menuWirtschaft"></div>
+        </div>
+        <div class="menu-category">
+            <h2 onclick="toggleCategory('menuTransformation')">Transformation</h2>
+            <div id="menuTransformation"></div>
+        </div>
+        <div class="menu-category">
+            <h2 onclick="toggleCategory('menuJugend')">Jugend</h2>
+            <div id="menuJugend"></div>
+        </div>
+        <div class="menu-category">
+            <h2 onclick="toggleCategory('menuDemokratie')">Demokratie</h2>
+            <div id="menuDemokratie"></div>
+        </div>
+    </div>
+</div>
+    <div id="map"></div>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Leaflet-Awesome-Markers JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.awesome-markers/2.0.1/leaflet.awesome-markers.min.js"></script>
+
+    <script>
+        // Die Karte initialisieren und den Mittelpunkt setzen
+        var map = L.map('map', {
+            zoomControl: false
+        }).setView([51.9, 11.7], 8); // Initialer Zoom für Sachsen-Anhalt
+
+        // OpenStreetMap Basiskarte hinzufügen
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Begrenze die Karte auf Sachsen-Anhalt
+        var southWest = L.latLng(50.5, 10.5);
+        var northEast = L.latLng(52.2, 12.5);
+        var bounds = L.latLngBounds(southWest, northEast);
+        map.setMaxBounds(bounds);
+        map.setMinZoom(7); // Minimaler Zoom um ganz Sachsen-Anhalt zu zeigen
+        map.setMaxZoom(16);
+
+        // Zoom-Steuerung oben rechts platzieren
+        L.control.zoom({
+            position: 'topright'
+        }).addTo(map);
+
+        // Beispielprojekte hinzufügen
+        var projects = [
+            {
+                lat: 51.482122079659966,
+                lng: 11.96157478273683,
+                name: 'Science Cube – Kompetenzzentrum für Wissenschaftskommunikation',
+                details: 'Wissenschaft ist keine Blackbox!', 
+                detailedInfo: '<h2>Dafür stehen wir:</h2>' +
+'<br>Wir stehen hinter den Nachhaltigkeitszielen der Europäischen Union und unterstützen den geplanten Kohleausstieg in Mitteldeutschland. Für uns ist es jedoch entscheidend, dass dieser Wandel sozial gerecht und inklusiv gestaltet wird. Ein wesentlicher Teil davon ist die transparente und verständliche Information der Bevölkerung. Als Kompetenzzentrum für Wissenschaftskommunikation fördern wir eine offene, partizipative Kommunikation, die den Menschen im Revier ermöglicht, den Wandel aktiv mitzugestalten und sich informiert einzubringen.' +
+'<h2>Unsere Botschaft: </h2>' +
+'<p>Wissenschaft ist keine Blackbox! Sie treibt eine sozial gerechte Transformation hin zu einer nachhaltigen und zukunftsorientierten Region voran. Mit-wissen ist der Schlüssel zur Beteiligung. Durch Wissenschaftskommunikation möchten wir gemeinsam mit Bürger*innen an positiven Zukunftsbildern arbeiten und so den Strukturwandel aktiv gestalten.</p>' +
+'<h2>Unser bisher größter Meilenstein in der Kommunikation:</h2>' +
+'<p>Der Launch unserer Science Cube Website, sowie die monatliche Etablierung unseres Dinner4Zero, bei dem wir Interessierte dazu einladen, sich bei einem 3-Gänge-Menü aus geretteten Lebensmitteln über Nachhaltigkeit und die Ernährung der Zukunft auszutauschen. </p>' +
+'<h2>Diese Schlagzeile möchten wir nach dem Kohleausstieg 2038 lesen:</h2>' +
+'<p>Neue Studie zeigt: Wissenschaftskommunikation war entscheidender Faktor für den erfolgreichen und inklusiven Strukturwandel in Mitteldeutschland.</p>',
+     
+                website: 'http://www.sciencecube.de/',
+                image: 'https://raw.githubusercontent.com/LuluFlora22/WEBMAP-Science2Public/refs/heads/main/Cube_Screen_color_A_white_background%20(1)%20-%20lisa_chmr.png',
+                category: 'Wissenschaft & Forschung',
+                tags: ['Wissenschaft & Forschung']
+            },
+            {
+                lat: 51.49840879115628,
+                lng: 11.962344795029901,
+                name: 'GOLEHM',
+                details: 'Initiative für Lehmbau und nachhaltige Kreislaufwirtschaft.',
+				detailedInfo: '<h2>Dafür stehen wir:</h2>' +
+'<br>Zurück in die Zukunft mit Lehm (als Baustoff)</br>' +
+'<h2>Unsere Botschaft: </h2>' +
+'<p>Lehm ist ein nachhaltiger, tragfähiger und wohngesunder Baustoff.</p>' +
+'<h2>Diese Schlagzeile möchten wir nach dem Kohleausstieg 2038 lesen:</h2>' +
+'<p>Mitteldeutsches Revier als Vorreiter in der Bauwende</p>',
+                website: 'https://www.golehm.de/',
+                image: 'https://raw.githubusercontent.com/LuluFlora22/WEBMAP-Science2Public/refs/heads/main/GOLEHM_Logo_Schrift_WIR_4c%20-%20Cedric%20Polzin.png',
+                category: 'Transformation',
+                tags: ['Transformation']
+            },
+           
+            
+            {
+                lat: 51.478524968305315,
+                lng: 11.974398908521975,
+                name: 'BiSMit - Netzwerkbüro Bildung im Strukturwandel in Mitteldeutschland',
+                details: 'Teil des Kompetenzzentrums Bildung im Strukturwandel.',
+	            detailedInfo: '<h2>Dafür stehen wir:</h2>' +
+'<br>Das Netzwerkbüro BiSMit unterstützt die Kommunen des Mitteldeutschen Reviers im Strukturwandel. Hierzu gehört es, Entwicklungen im Bildungsbereich datengestützt zu analysieren, Herausforderungen mit den Akteuren vor Ort zu diskutieren und Impulse zur Stärkung der regionalen Bildungslandschaft zu setzen.</br>' +
+'<h2>Unsere Botschaft: </h2>' +
+'<p>Der Strukturwandel ist eine gesamtgesellschaftliche Aufgabe, die nur gelingen kann, wenn sie eng mit der Idee des lebenslangen Lernens verknüpft ist..</p>' +
+'<h2>Unser bisher größter Meilenstein in der Kommunikation:</h2>' +
+'<p>Wir haben ein interkommunalen Austauschformat etabliert, das Mitarbeitenden der neun Kommunen des Mitteldeutschen Braunkohlereviers ermöglicht, über strukturwandelrelevante Bildungsthemen zu kommunizieren und voneinander zu lernen. Hinzu kommt die Veröffentlichung und Online-Präsentationen wissenschaftlicher Studien zu Themen wie Weiterbildung, Jugendbeteiligung und Berufsorientierung im Mitteldeutschen Revier.</p>' +
+'<h2>Diese Schlagzeile möchten wir nach dem Kohleausstieg 2038 lesen:</h2>' +
+'<p>Bildung schafft revierweit Chancengleichheit – in der Stadt und auf dem Land!</p>',
+                website: 'https://www.bismit.de/',
+                image: 'https://raw.githubusercontent.com/LuluFlora22/WEBMAP-Science2Public/refs/heads/main/BiSMit_Marke_RGB_300dpi%20-%20Bettina%20von%20Frommannshausen.jpg',
+                category: 'Transformation',
+                tags: ['Transformation']
+            }
+        ];
+
+        projects.forEach(function(project) {
+    var icon = L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/LuluFlora22/WEBMAP-Science2Public/refs/heads/main/box-solid.svg',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png'
+    });
+
+    var marker = L.marker([project.lat, project.lng], { icon: icon }).addTo(map);
+
+    // Pop-up nur einmal binden
+    marker.bindPopup('<b>' + project.name + '</b><br>' +
+                 '<p>' + project.details + '</p>' +
+                 '<div class="popup-footer">' +
+                 project.tags.map(tag => `<span class="category-tag ${tag}">#${tag}</span>`).join('') +
+                 '<button onclick="showDetails(\'' + project.name + '\')" class="info-button">Blackbox öffnen</button>' +
+                 '</div>');
+
+
+    // Pop-up auf Hover öffnen
+    marker.on('mouseover', function() {
+        marker.openPopup();
+    });
+
+    // Pop-up beim Verlassen des Markers schließen
+    marker.on('mouseleave', function() {
+        marker.closePopup();
+    });
+
+marker.on('click', function() {
+    // Pop-up schließen
+    marker.closePopup();
+
+    // Verwende eine kurze Verzögerung, um sicherzustellen, dass das Pop-up vollständig geschlossen ist
+    setTimeout(function() {
+        showDetails(project.name);
+    }, 200); // 200 ms Verzögerung, um sicherzustellen, dass das Pop-up geschlossen wurde
+});
+
+    // Menüpunkte für die Sidebar hinzufügen
+    var menu;
+    switch (project.category) {
+        case 'Stadt':
+            menu = document.getElementById('menuStadt');
+            break;
+        case 'Land':
+            menu = document.getElementById('menuLand');
+            break;
+        case 'Wissenschaft & Forschung':
+            menu = document.getElementById('menuWissenschaft');
+            break;
+        case 'Technologie':
+            menu = document.getElementById('menuTechnologie');
+            break;
+        case 'Partizipation':
+            menu = document.getElementById('menuPartizipation');
+            break;
+        case 'Umwelt':
+            menu = document.getElementById('menuUmwelt');
+            break;
+        case 'Soziales':
+            menu = document.getElementById('menuSoziales');
+            break;
+        case 'Kultur':
+            menu = document.getElementById('menuKultur');
+            break;
+        case 'Gründung':
+            menu = document.getElementById('menuGruendung');
+            break;
+        case 'Wirtschaft':
+            menu = document.getElementById('menuWirtschaft');
+            break;
+        case 'Transformation':
+            menu = document.getElementById('menuTransformation');
+            break;
+        case 'Jugend':
+            menu = document.getElementById('menuJugend');
+            break;
+        case 'Demokratie':
+            menu = document.getElementById('menuDemokratie');
+            break;
+    }
+    if (menu) {
+        menu.innerHTML += '<button onclick="map.setView([' + project.lat + ', ' + project.lng + '], 12)">' + project.name + '</button>';
+    }
+});
+
+
+
+        // Details anzeigen
+        function showDetails(name) {
+            var project = projects.find(function(p) {
+                return p.name === name;
+            });
+
+            if (project) {
+                var modal = document.getElementById("modal");
+                var modalBody = document.getElementById("modal-body");
+                modalBody.innerHTML = '<h2>' + project.name + '</h2>' +
+                                      '<p>' + project.detailedInfo + '</p>' +
+                                      project.tags.map(tag => `<span class="category-tag ${tag}">#${tag}</span>`).join('') +
+                                      '<a href="' + project.website + '" target="_blank" class="website-button">Website</a>' +
+                                      '<img src="' + project.image + '" alt="Projektbild" style="max-width: 100%; height: auto; margin-top: 10px;">';
+                modal.style.display = "block";
+            }
+        }
+
+        function closeModal() {
+            document.getElementById("modal").style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            var modal = document.getElementById("modal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        function searchProjects() {
+            var input = document.getElementById('searchInput').value.toLowerCase();
+            projects.forEach(function(project) {
+                if (project.name.toLowerCase().includes(input) || project.details.toLowerCase().includes(input)) {
+                    map.setView([project.lat, project.lng], 12);
+                }
+            });
+        }
+
+        function toggleCategory(id) {
+            var element = document.getElementById(id);
+            if (element.style.display === "none" || element.style.display === "") {
+                element.style.display = "block";
+            } else {
+                element.style.display = "none";
+            }
+        }
+
+        // GeoJSON-Datei für die Landesgrenze laden
+        fetch("https://raw.githubusercontent.com/LuluFlora22/WEBMAP-Science2Public/refs/heads/main/sachsen_anhalt%20(1).geojson")
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: function(feature) {
+                        return {
+                            color: '#3188ff',
+                            weight: 2,
+                            opacity: 1
+                        };
+                    }
+                }).addTo(map);
+            })
+            .catch(error => console.error('Error loading the GeoJSON:', error));
+
+    </script>
+
+    <div id="modal" style="position: absolute; top: 10%; left: 50%; transform: translate(-50%, 0); display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); z-index: 2000; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+    <span class="close" onclick="closeModal()" style="cursor: pointer; position: absolute; top: 10px; right: 15px; font-size: 20px; color: #FF8E74;">&times;</span>
+    <div id="modal-body"></div>
+</div>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
